@@ -74,7 +74,7 @@ We don't have a real API for this challenge, so we added some utilities to simul
 
 1. Make your viewport smaller in height. Small enough to have a scroll bar
 2. Click on the **Filter by employee** select to open the options dropdown
-3. Scroll down the page 
+3. Scroll down the page
 
 **Expected:** Options dropdown moves with its parent input as you scroll the page
 
