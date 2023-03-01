@@ -13,6 +13,7 @@ export function App() {
   const { data: paginatedTransactions, ...paginatedTransactionsUtils } = usePaginatedTransactions()
   const { data: transactionsByEmployee, ...transactionsByEmployeeUtils } = useTransactionsByEmployee()
   const [isLoading, setIsLoading] = useState(false)
+  const [paginated, setIsPaginated] = useState(true)
 
   const transactions = useMemo(
     () => paginatedTransactions?.data ?? transactionsByEmployee ?? null,
@@ -21,11 +22,18 @@ export function App() {
 
   const loadAllTransactions = useCallback(async () => {
     setIsLoading(true)
+    setIsPaginated(true)
     transactionsByEmployeeUtils.invalidateData()
 
     await employeeUtils.fetchAll()
-    await paginatedTransactionsUtils.fetchAll()
+    if(paginatedTransactions?.nextPage!==null){
+      await paginatedTransactionsUtils.fetchAll()
+    }
 
+    if(paginatedTransactions!==null){
+      console.log(paginatedTransactions)
+      if(paginatedTransactions.nextPage===null){setIsPaginated(false)};
+    }
     setIsLoading(false)
   }, [employeeUtils, paginatedTransactionsUtils, transactionsByEmployeeUtils])
 
@@ -33,6 +41,7 @@ export function App() {
     async (employeeId: string) => {
       paginatedTransactionsUtils.invalidateData()
       await transactionsByEmployeeUtils.fetchById(employeeId)
+      setIsPaginated(false)
     },
     [paginatedTransactionsUtils, transactionsByEmployeeUtils]
   )
@@ -82,7 +91,8 @@ export function App() {
           {transactions !== null && (
             <button
               className="RampButton"
-              disabled={paginatedTransactionsUtils.loading}
+              hidden={!paginated}
+              disabled={paginatedTransactionsUtils.loading || !paginated}
               onClick={async () => {
                 await loadAllTransactions()
               }}
